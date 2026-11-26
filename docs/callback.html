@@ -1,0 +1,17 @@
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="referrer" content="no-referrer"><title>TikTok terhubung</title><link rel="stylesheet" href="style.css"></head><body><main>
+<h1>Langkah terakhir</h1>
+<div id="ok" class="card" hidden>
+<p>Salin kode di bawah, lalu jalankan workflow <strong>Authorize TikTok (one-time)</strong> dalam beberapa menit (kodenya cepat kedaluwarsa).</p>
+<p><code id="code"></code></p>
+<p><button id="copy">Salin kode</button></p>
+<p><a id="run" href="https://github.com/rifkysafa38-creator/tiktok-poster/actions/workflows/authorize.yml">Buka workflow Authorize →</a> lalu <em>Run workflow</em> dan tempel kodenya.</p>
+</div>
+<div id="err" class="card" hidden><p>Tidak ada kode di alamat ini. Ulangi login TikTok dari README langkah 4.</p><p id="emsg" class="muted"></p></div>
+<p class="muted">Kode ini hanya bisa dipakai sekali dan tidak berguna tanpa client secret yang tersimpan di GitHub secrets. Halaman ini tidak mengirim kode ke mana pun.</p>
+</main><script>
+var p=new URLSearchParams(location.search),c=p.get('code');
+if(c){document.getElementById('ok').hidden=false;document.getElementById('code').textContent=c;
+document.getElementById('copy').onclick=function(){navigator.clipboard.writeText(c).then(function(){document.getElementById('copy').textContent='Tersalin ✓'})}}
+else{document.getElementById('err').hidden=false;document.getElementById('emsg').textContent=(p.get('error')||'')+' '+(p.get('error_description')||'')}
+</script></body></html>

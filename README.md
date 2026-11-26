@@ -13,17 +13,26 @@ draft. Kamu cukup buka aplikasi TikTok, tempel caption, dan tekan **Post**.
 
 ## Setup (sekali saja, ±30 menit)
 
-### 1. Buat repo privat
-Di GitHub: **New repository** → nama `tiktok-poster` → **Private** → *Create* (biarkan kosong).
-Lalu beri tahu Claude: *"repo sudah dibuat"*. Claude yang akan mengisi kodenya.
+### 1. Buat repo dan sambungkan ke Claude
+1. Di GitHub: **New repository** → nama `tiktok-poster` → **Public** → *Create* (biarkan kosong).
+   Kenapa publik: GitHub Pages gratis hanya untuk repo publik, dan halaman Kebijakan Privasi,
+   Syarat Layanan, serta halaman redirect yang diminta TikTok di-host dari sini. Aman karena kode
+   tidak berisi rahasia, dan *Actions secrets* tetap terenkripsi dan tidak terlihat orang lain.
+2. Buka **https://claude.ai/connect-github**, pastikan GitHub terhubung dan **Claude GitHub App**
+   terpasang untuk repo `tiktok-poster`.
+3. Beri tahu Claude: *"repo sudah dibuat"*. Claude akan mengisi kodenya.
+4. Repo → **Settings → Pages** → Source: *Deploy from a branch* → Branch `main`, folder `/docs` →
+   *Save*. Setelah ±1 menit, halaman ini aktif:
+   - https://rifkysafa38-creator.github.io/tiktok-poster/ (beranda)
+   - https://rifkysafa38-creator.github.io/tiktok-poster/privacy.html
+   - https://rifkysafa38-creator.github.io/tiktok-poster/terms.html
 
 ### 2. Daftar aplikasi developer TikTok
 1. Buka **developers.tiktok.com** → login dengan akun TikTok kamu → **Manage apps** → **Connect an app**.
 2. Isi nama aplikasi (misal `insight_financial poster`), ikon, kategori, dan deskripsi singkat.
-   TikTok biasanya meminta URL **Terms of Service** dan **Privacy Policy**. Kalau belum punya
-   website, minta Claude membuatkan halaman sederhana.
+   Untuk **Website / Terms of Service / Privacy Policy** pakai tiga URL dari langkah 1.4.
 3. **Add products**:
-   - **Login Kit**: platform *Web*, Redirect URI: `https://github.com/rifkysafa38-creator`
+   - **Login Kit**: platform *Web*, Redirect URI: `https://rifkysafa38-creator.github.io/tiktok-poster/callback.html`
    - **Content Posting API**: aktifkan; *Direct Post* boleh dibiarkan mati.
 4. **Scopes**: centang `user.info.basic` dan `video.upload`.
 5. Pakai mode **Sandbox**: tambahkan akun TikTok kamu sendiri sebagai *target user*. Kalau TikTok
@@ -39,7 +48,7 @@ Repo `tiktok-poster` → **Settings → Secrets and variables → Actions**:
 | Secret | `TIKTOK_CLIENT_KEY` | Client key dari langkah 2 |
 | Secret | `TIKTOK_CLIENT_SECRET` | Client secret dari langkah 2 |
 | Secret | `GH_PAT` | Fine-grained token: github.com → Settings → Developer settings → Personal access tokens → *Fine-grained* → Repository access: **hanya** `tiktok-poster` → Permissions: **Secrets: Read and write** → masa berlaku 1 tahun |
-| Variable | `TIKTOK_REDIRECT_URI` | `https://github.com/rifkysafa38-creator` (harus sama persis dengan langkah 2.3) |
+| Variable | `TIKTOK_REDIRECT_URI` | `https://rifkysafa38-creator.github.io/tiktok-poster/callback.html` (harus sama persis dengan langkah 2.3) |
 
 `GH_PAT` dibutuhkan karena TikTok mengganti refresh token setiap kali diperpanjang, dan workflow
 harus menyimpan token baru itu kembali ke secrets.
@@ -47,12 +56,12 @@ harus menyimpan token baru itu kembali ke secrets.
 ### 4. Hubungkan akun TikTok (sekali)
 1. Buka URL ini di browser (ganti `CLIENT_KEY`; client key bukan rahasia):
    ```
-   https://www.tiktok.com/v2/auth/authorize/?client_key=CLIENT_KEY&scope=user.info.basic,video.upload&response_type=code&redirect_uri=https%3A%2F%2Fgithub.com%2Frifkysafa38-creator&state=insight
+   https://www.tiktok.com/v2/auth/authorize/?client_key=CLIENT_KEY&scope=user.info.basic,video.upload&response_type=code&redirect_uri=https%3A%2F%2Frifkysafa38-creator.github.io%2Ftiktok-poster%2Fcallback.html&state=insight
    ```
-2. Login dan setujui. Kamu akan diarahkan ke halaman GitHub dengan alamat berisi `?code=...`.
-3. Salin nilai `code` (dari setelah `code=` sampai sebelum `&scopes` / `&state`).
-4. **Segera** (kode cepat kedaluwarsa) buka repo → **Actions → Authorize TikTok (one-time) →
-   Run workflow** → tempel kode → *Run*. Kalau hasilnya hijau, setup selesai.
+2. Login dan setujui. Kamu diarahkan ke halaman **"Langkah terakhir"** yang menampilkan kode
+   dan tombol **Salin kode**.
+3. **Segera** (kode cepat kedaluwarsa) klik tautan *Buka workflow Authorize* di halaman itu →
+   **Run workflow** → tempel kode → *Run*. Kalau hasilnya hijau, setup selesai.
 
 ### 5. Beri tahu Claude
 *"TikTok sudah terhubung."* Claude akan mengirim satu video uji ke inbox kamu.
