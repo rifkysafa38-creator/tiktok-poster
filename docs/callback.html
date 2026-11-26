@@ -1,17 +1,32 @@
 <!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="referrer" content="no-referrer"><title>TikTok terhubung</title><link rel="stylesheet" href="style.css"></head><body><main>
+<meta name="referrer" content="no-referrer"><title>TikTok terhubung</title><link rel="stylesheet" href="style.css">
+<style>
+textarea{width:100%;box-sizing:border-box;font:15px/1.4 ui-monospace,Consolas,monospace;padding:10px;border-radius:8px;border:2px solid var(--accent);background:var(--bg);color:var(--fg);resize:none}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}#status{font-weight:600}
+ol{padding-left:1.2em}li{margin:.4em 0}
+</style></head><body><main>
 <h1>Langkah terakhir</h1>
 <div id="ok" class="card" hidden>
-<p>Salin kode di bawah, lalu jalankan workflow <strong>Authorize TikTok (one-time)</strong> dalam beberapa menit (kodenya cepat kedaluwarsa).</p>
-<p><code id="code"></code></p>
-<p><button id="copy">Salin kode</button></p>
-<p><a id="run" href="https://github.com/rifkysafa38-creator/tiktok-poster/actions/workflows/authorize.yml">Buka workflow Authorize →</a> lalu <em>Run workflow</em> dan tempel kodenya.</p>
+<p><strong>1.</strong> Salin kode ini (sudah terblok otomatis, cukup tekan <kbd>Ctrl</kbd>+<kbd>C</kbd>, atau klik tombol):</p>
+<textarea id="code" rows="4" readonly></textarea>
+<div class="row"><button id="copy">Salin kode</button><span id="status"></span></div>
+<p style="margin-top:18px"><strong>2.</strong> Buka <a id="run" target="_blank" rel="noopener" href="https://github.com/rifkysafa38-creator/tiktok-poster/actions/workflows/authorize.yml">workflow Authorize di GitHub ↗</a>, lalu:</p>
+<ol><li>Klik tombol <strong>Run workflow</strong> (kanan).</li>
+<li>Klik kolom <em>"The ?code=... value"</em>, tekan <kbd>Ctrl</kbd>+<kbd>V</kbd>.</li>
+<li>Klik tombol hijau <strong>Run workflow</strong>.</li></ol>
+<p class="muted">Kerjakan dalam beberapa menit: kode cepat kedaluwarsa dan hanya bisa dipakai sekali. Kalau kedaluwarsa, ulangi login TikTok.</p>
 </div>
-<div id="err" class="card" hidden><p>Tidak ada kode di alamat ini. Ulangi login TikTok dari README langkah 4.</p><p id="emsg" class="muted"></p></div>
-<p class="muted">Kode ini hanya bisa dipakai sekali dan tidak berguna tanpa client secret yang tersimpan di GitHub secrets. Halaman ini tidak mengirim kode ke mana pun.</p>
+<div id="err" class="card" hidden><p>Tidak ada kode di alamat ini. Ulangi login TikTok.</p><p id="emsg" class="muted"></p></div>
+<p class="muted">Kode tidak berguna tanpa client secret yang tersimpan di GitHub secrets. Halaman ini tidak mengirim kode ke mana pun.</p>
 </main><script>
-var p=new URLSearchParams(location.search),c=p.get('code');
-if(c){document.getElementById('ok').hidden=false;document.getElementById('code').textContent=c;
-document.getElementById('copy').onclick=function(){navigator.clipboard.writeText(c).then(function(){document.getElementById('copy').textContent='Tersalin ✓'})}}
+var p=new URLSearchParams(location.search),c=p.get('code'),ta=document.getElementById('code'),st=document.getElementById('status');
+function sel(){ta.focus();ta.select();ta.setSelectionRange(0,ta.value.length)}
+function fallback(){sel();var ok=false;try{ok=document.execCommand('copy')}catch(e){}
+  st.textContent=ok?'Tersalin ✓':'Tidak bisa menyalin otomatis: kode sudah terblok, tekan Ctrl+C';}
+if(c){document.getElementById('ok').hidden=false;ta.value=c;sel();
+  ta.addEventListener('focus',sel);ta.addEventListener('click',sel);
+  document.getElementById('copy').onclick=function(){
+    if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(c).then(function(){st.textContent='Tersalin ✓';sel()},fallback)}
+    else fallback();};}
 else{document.getElementById('err').hidden=false;document.getElementById('emsg').textContent=(p.get('error')||'')+' '+(p.get('error_description')||'')}
 </script></body></html>
