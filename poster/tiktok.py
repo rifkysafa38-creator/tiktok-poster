@@ -58,6 +58,9 @@ def _save_refresh(tok):
 
 
 def token_request(params):
+    # length/prefix diagnostics only (never the value) to spot copy-paste mistakes
+    ck, cs = params.get("client_key", ""), params.get("client_secret", "")
+    print(f"client_key: {len(ck)} chars, starts with {ck[:2]!r}; client_secret: {len(cs)} chars")
     form = urllib.parse.urlencode(params).encode()
     code, res = _req("POST", f"{API}/v2/oauth/token/", data=form,
                      headers={"Content-Type": "application/x-www-form-urlencoded",
@@ -72,8 +75,8 @@ def token_request(params):
 
 def exchange():
     _need("TIKTOK_CLIENT_KEY", "TIKTOK_CLIENT_SECRET", "AUTH_CODE", "REDIRECT_URI")
-    params = {"client_key": os.environ["TIKTOK_CLIENT_KEY"],
-              "client_secret": os.environ["TIKTOK_CLIENT_SECRET"],
+    params = {"client_key": os.environ["TIKTOK_CLIENT_KEY"].strip(),
+              "client_secret": os.environ["TIKTOK_CLIENT_SECRET"].strip(),
               "code": urllib.parse.unquote(os.environ["AUTH_CODE"].strip()),
               "grant_type": "authorization_code",
               "redirect_uri": os.environ["REDIRECT_URI"].strip()}
@@ -84,10 +87,10 @@ def exchange():
 
 def refresh():
     _need("TIKTOK_CLIENT_KEY", "TIKTOK_CLIENT_SECRET", "TIKTOK_REFRESH_TOKEN")
-    tok = token_request({"client_key": os.environ["TIKTOK_CLIENT_KEY"],
-                         "client_secret": os.environ["TIKTOK_CLIENT_SECRET"],
+    tok = token_request({"client_key": os.environ["TIKTOK_CLIENT_KEY"].strip(),
+                         "client_secret": os.environ["TIKTOK_CLIENT_SECRET"].strip(),
                          "grant_type": "refresh_token",
-                         "refresh_token": os.environ["TIKTOK_REFRESH_TOKEN"]})
+                         "refresh_token": os.environ["TIKTOK_REFRESH_TOKEN"].strip()})
     _save_refresh(tok)  # TikTok may rotate the refresh token: always store the newest one
     if "video.upload" not in str(tok.get("scope", "")):
         sys.exit(f"token lacks the video.upload scope (scope={tok.get('scope')}). "
