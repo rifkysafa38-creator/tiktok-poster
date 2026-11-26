@@ -69,9 +69,11 @@ harus menyimpan token baru itu kembali ke secrets.
 ## Cara kerja setiap posting
 1. Claude selesai membuat video dan mengirim `final.mp4` + caption ke chat.
 2. Kamu cek, lalu balas **"post"**.
-3. Claude membuat *release* di repo ini berisi `final.mp4` (caption ada di catatan release), lalu
-   menjalankan workflow **Post to TikTok inbox**.
-4. Notifikasi masuk di aplikasi TikTok → buka draft → tempel caption → **Post**.
+3. Claude mem-push `final.mp4` + `caption.txt` ke branch sementara `queue/<nama-video>`. Push itu
+   otomatis menjalankan workflow **Post to TikTok inbox**, yang mengunggah video ke inbox TikTok
+   lalu menghapus branch tersebut.
+4. Notifikasi masuk di aplikasi TikTok → buka draft → tempel caption (juga tercetak di log
+   workflow) → **Post**.
 
 ## Perawatan
 - **GH_PAT** kedaluwarsa sesuai masa berlaku yang kamu pilih. Buat baru sebelum habis.

@@ -1,14 +1,12 @@
 name: Post to TikTok inbox (draft)
 
-# Triggered by the ekonomi-shorts skill after you approve a video:
-#   gh workflow run post.yml -f tag=<release-tag>
-# The release <tag> holds final.mp4 (+ caption.txt in the release notes).
+# The ekonomi-shorts skill pushes an approved video to a temporary branch
+#   queue/<video-name>   containing final.mp4 + caption.txt
+# That push triggers this workflow. After the upload the branch is deleted.
 on:
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: "Release tag that holds final.mp4"
-        required: true
+  push:
+    branches:
+      - "queue/**"
 
 # one run at a time: the refresh token rotates and must not be used twice in parallel
 concurrency:
@@ -16,22 +14,30 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
-  contents: read
+  contents: write   # to delete the temporary queue branch afterwards
 
 jobs:
   post:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout tool code (main)
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: tool
 
-      - name: Download video from release
-        env:
-          GH_TOKEN: ${{ github.token }}
-          TAG: ${{ inputs.tag }}
+      - name: Checkout queued video
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+          path: media
+
+      - name: Show caption (paste it in the TikTok app)
         run: |
-          gh release download "$TAG" --pattern 'final.mp4' --dir media
           ls -la media
+          echo "----- caption -----"
+          cat media/caption.txt || true
 
       - name: Upload to TikTok inbox
         env:
@@ -39,7 +45,7 @@ jobs:
           TIKTOK_CLIENT_SECRET: ${{ secrets.TIKTOK_CLIENT_SECRET }}
           TIKTOK_REFRESH_TOKEN: ${{ secrets.TIKTOK_REFRESH_TOKEN }}
           NEW_REFRESH_TOKEN_FILE: ${{ runner.temp }}/rt.txt
-        run: python3 poster/tiktok.py upload media/final.mp4
+        run: python3 tool/poster/tiktok.py upload media/final.mp4
 
       - name: Store rotated refresh token
         if: always()
@@ -55,3 +61,8 @@ jobs:
           else
             echo "no new refresh token (token step did not run)"
           fi
+
+      - name: Delete the queue branch
+        if: success()
+        working-directory: media
+        run: git push origin --delete "${GITHUB_REF_NAME}"
