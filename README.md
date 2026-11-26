@@ -29,7 +29,7 @@ draft. Kamu cukup buka aplikasi TikTok, tempel caption, dan tekan **Post**.
 
 ### 2. Daftar aplikasi developer TikTok
 1. Buka **developers.tiktok.com** → login dengan akun TikTok kamu → **Manage apps** → **Connect an app**.
-2. Isi nama aplikasi (misal `insight_financial poster`), ikon, kategori, dan deskripsi singkat.
+2. Isi nama aplikasi (misal `insightfinansial poster`), ikon, kategori, dan deskripsi singkat.
    Untuk **Website / Terms of Service / Privacy Policy** pakai tiga URL dari langkah 1.4.
 3. **Add products**:
    - **Login Kit**: platform *Web*, Redirect URI: `https://rifkysafa38-creator.github.io/tiktok-poster/callback.html`
