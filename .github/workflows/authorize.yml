@@ -1,0 +1,46 @@
+name: Authorize TikTok (one-time)
+
+# Run once after you log in to TikTok and approve the app (see README, step 4).
+# Paste the `code` from the redirect URL into the input. The code is single-use, expires within
+# minutes and is useless without the client secret, which never leaves Actions secrets.
+on:
+  workflow_dispatch:
+    inputs:
+      code:
+        description: "The ?code=... value from the redirect URL"
+        required: true
+
+concurrency:
+  group: tiktok-token
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  authorize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Exchange code for tokens
+        env:
+          TIKTOK_CLIENT_KEY: ${{ secrets.TIKTOK_CLIENT_KEY }}
+          TIKTOK_CLIENT_SECRET: ${{ secrets.TIKTOK_CLIENT_SECRET }}
+          AUTH_CODE: ${{ inputs.code }}
+          REDIRECT_URI: ${{ vars.TIKTOK_REDIRECT_URI }}
+          NEW_REFRESH_TOKEN_FILE: ${{ runner.temp }}/rt.txt
+        run: |
+          echo "::add-mask::$AUTH_CODE"
+          python3 poster/tiktok.py exchange
+
+      - name: Save refresh token
+        env:
+          GH_TOKEN: ${{ secrets.GH_PAT }}
+          RT_FILE: ${{ runner.temp }}/rt.txt
+        run: |
+          echo "::add-mask::$(cat "$RT_FILE")"
+          gh secret set TIKTOK_REFRESH_TOKEN --repo "$GITHUB_REPOSITORY" < "$RT_FILE"
+          rm -f "$RT_FILE"
+          echo "TikTok authorized. Refresh token stored as secret TIKTOK_REFRESH_TOKEN."
